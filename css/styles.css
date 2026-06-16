@@ -751,7 +751,11 @@ body.v3 .v3-hero { min-height: 88vh; display: flex; align-items: center; padding
 .v3-goal .goal-num { font-size: 34px; }
 .v3-cov { padding: 24px 26px; display: flex; flex-direction: column; gap: 8px; }
 .v3-persona { padding: 24px 26px 0; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
-.v3-persona .pslide-viz { margin: 18px -26px 0; height: 90px; }
+.v3-persona .pslide-viz { margin: 18px -26px 0; height: 5px; }
+.persona-facts { list-style: none; margin: 8px 0 16px; padding: 0; display: flex; flex-direction: column; gap: 11px; }
+.persona-facts li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
+.persona-facts li::before { content: '•'; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
+.persona-facts li b { color: var(--ink); font-weight: 700; }
 
 /* findings summary bars */
 .v3-summary { display: flex; flex-direction: column; gap: 14px; }

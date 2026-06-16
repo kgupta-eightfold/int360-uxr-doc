@@ -717,8 +717,11 @@ function v3Page() {
       h('div', { class: `glass v3-persona pslide--${p.key.toLowerCase()}` },
         h('span', { class: 'pslide-count' }, p.count),
         h('h4', {}, p.name),
-        h('p', { class: 'pslide-role' }, p.role),
-        h('p', { class: 'pslide-watch' }, p.watch),
+        p.facts
+          ? h('ul', { class: 'persona-facts' }, p.facts.map(f =>
+              h('li', {}, h('b', {}, `${f.label}: `), f.value)))
+          : [p.role ? h('p', { class: 'pslide-role' }, p.role) : null,
+             p.watch ? h('p', { class: 'pslide-watch' }, p.watch) : null],
         h('div', { class: 'pslide-viz' })))));
 
   const coverage = v3Sec('v3-coverage', 'Context · 03', 'Coverage — what we probed', null,
