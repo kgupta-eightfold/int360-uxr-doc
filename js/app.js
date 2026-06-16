@@ -710,8 +710,7 @@ function v3Page() {
     ));
 
   const goals = v3Sec('v3-goals', 'Context · 01', 'Goals of the research', null,
-    h('div', { class: 'v3-cards reveal' }, c.goals.map((g, i) =>
-      h('div', { class: 'glass v3-goal' }, h('span', { class: 'goal-num' }, `0${i + 1}`), h('p', {}, g)))));
+    h('div', { class: 'reveal' }, c.goals.map(g => h('p', { class: 'v3-goal-hero' }, g))));
 
   const personas = v3Sec('v3-personas', 'Context · 02', 'Personas considered', PERSONA_HINT[v2track],
     h('div', { class: 'v3-cards reveal' }, c.personas.map(p =>
