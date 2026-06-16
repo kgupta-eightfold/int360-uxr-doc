@@ -272,8 +272,8 @@ function personaCarousel(personas) {
 }
 
 const PERSONA_HINT = {
-  candidate: 'Scroll horizontally — 10 candidates across the Tech, Functional and HVH tracks.',
-  recruiter: 'Scroll horizontally — 20 recruiters: 3 moderated and 17 unmoderated, across US, India and UK.',
+  candidate: '10 candidates across the Tech, Functional and HVH tracks.',
+  recruiter: '20 recruiters: 3 moderated and 17 unmoderated, across US, India and UK.',
 };
 
 function agendaPage() {
