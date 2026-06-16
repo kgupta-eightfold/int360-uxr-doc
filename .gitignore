@@ -1,0 +1,9 @@
+# Plaintext research data — NEVER publish. Only the AES-encrypted
+# js/app-data.enc.json is committed; these are the build-time sources.
+js/data.js
+js/v2content.js
+
+# OS / tooling
+.DS_Store
+node_modules/
+*.log

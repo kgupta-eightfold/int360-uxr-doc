@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>UXR Shareout — AI Interview · May 2026</title>
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body class="locked">
+  <div id="gate" class="gate">
+    <form class="gate-card" id="gate-form" autocomplete="on">
+      <div class="gate-lock" aria-hidden="true">🔒</div>
+      <p class="gate-eyebrow">UXR · AI Interview · May 2026</p>
+      <h1 class="gate-title">Protected shareout</h1>
+      <p class="gate-sub">This readout contains confidential research. Enter the password to continue.</p>
+      <input type="password" id="gate-pw" name="password" autocomplete="current-password" placeholder="Password" aria-label="Password" />
+      <button type="submit" class="gate-btn">Unlock</button>
+      <p class="gate-err" id="gate-err" role="alert" hidden>Incorrect password — try again.</p>
+    </form>
+  </div>
+
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="masthead">
+        <span class="eyebrow">UXR · AI Interview · May 2026</span>
+        <h1 class="site-title">Research Shareout</h1>
+      </div>
+      <nav class="tabs" role="tablist" aria-label="Study track">
+        <button class="tab" role="tab" data-route="candidate" aria-selected="false">Candidate&nbsp;UXR</button>
+        <button class="tab" role="tab" data-route="recruiter" aria-selected="false">Recruiter&nbsp;UXR</button>
+      </nav>
+    </div>
+    <nav class="subnav" id="subnav" aria-label="Page sections"></nav>
+  </header>
+
+  <main id="app" class="container" tabindex="-1"></main>
+
+  <footer class="site-footer">
+    <div class="container" id="footer-meta"></div>
+  </footer>
+
+  <div class="v3-aurora" aria-hidden="true"><span></span><span></span><span></span><span></span></div>
+  <button class="to-top" id="to-top" type="button" aria-label="Back to top">↑</button>
+
+  <script type="module" src="js/gate.js"></script>
+</body>
+</html>
