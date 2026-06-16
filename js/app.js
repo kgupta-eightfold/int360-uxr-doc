@@ -696,7 +696,6 @@ function findingsDetail(sets) {
 
 function v3Page() {
   const c = V2[v2track];
-  const d = lensData(v2track, 'all');
   const rows = RAW_BY_TRACK[v2track];
 
   const hero = h('section', { class: 'section v3-sec v3-hero', id: 'v3-agenda' },
@@ -731,28 +730,20 @@ function v3Page() {
         h('h4', {}, cov.stage),
         h('p', {}, cov.summary)))));
 
-  const panels = [
-    { key: 'works', label: 'What worked', dot: 'dot-works', items: d.works, render: worksItem,
-      blurb: 'Strengths candidates and recruiters consistently valued.' },
-    { key: 'critical', label: 'Critical feedback', dot: 'dot-critical', items: d.critical, render: criticalItem,
-      blurb: 'The P1 friction points most likely to drive drop-off.' },
-    { key: 'recs', label: 'Recommendations', dot: 'dot-recs', items: d.recs, render: recItem,
-      blurb: 'Prioritised UX & product fixes that address the feedback.' },
-  ];
-
-  const summaryBars = h('div', { class: 'v3-summary reveal' }, panels.map(p =>
-    h('div', { class: 'glass v3-bar' },
-      h('span', { class: `fcol-dot ${p.dot}` }),
-      h('div', { class: 'v3-bar-text' }, h('b', {}, p.label), h('span', {}, p.blurb)),
-      h('span', { class: 'v3-bar-count' }, String(p.items.length)))));
+  const tk = c.takeaways;
+  const takeawayCards = h('div', { class: 'v3-takeaways reveal' }, tk.cards.map((card, i) =>
+    h('div', { class: 'glass v3-takeaway' },
+      h('span', { class: 'v3-takeaway-num' }, `0${i + 1}`),
+      h('h4', {}, card.title),
+      h('p', {}, card.body))));
 
   const findings = h('section', { class: 'section v3-sec', id: 'v3-findings' },
     h('div', { class: 'v3-wrap' },
       h('div', { class: 'reveal v3-head' },
         h('p', { class: 'section-kicker' }, 'Findings'),
-        h('h2', { class: 'section-title' }, 'What we heard'),
-        h('p', { class: 'section-sub' }, 'A summary first — then explore the evidence by journey stage. Switch stages, switch tabs, and expand any screenshot.')),
-      summaryBars),
+        h('h2', { class: 'section-title' }, tk.title),
+        h('p', { class: 'section-sub' }, tk.subtext)),
+      takeawayCards),
     findingsDetail(buildJourneySets(v2track)));
 
   const appendix = v3Sec('v3-appendix', 'Appendix', 'Raw research log',

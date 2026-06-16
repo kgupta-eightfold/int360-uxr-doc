@@ -757,6 +757,14 @@ body.v3 .v3-hero { min-height: 88vh; display: flex; align-items: center; padding
 .persona-facts li::before { content: '•'; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
 .persona-facts li b { color: var(--ink); font-weight: 700; }
 
+/* findings — main takeaway cards */
+.v3-takeaways { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+@media (max-width: 880px) { .v3-takeaways { grid-template-columns: 1fr; } }
+.v3-takeaway { padding: 26px 28px; display: flex; flex-direction: column; gap: 12px; }
+.v3-takeaway-num { font: 800 22px var(--sans); letter-spacing: -.02em; color: var(--accent); }
+.v3-takeaway h4 { font-size: 18px; font-weight: 800; letter-spacing: -.01em; line-height: 1.28; margin: 0; }
+.v3-takeaway p { font-size: 14px; color: var(--ink-soft); line-height: 1.55; margin: 0; }
+
 /* findings summary bars */
 .v3-summary { display: flex; flex-direction: column; gap: 14px; }
 .v3-bar { display: flex; align-items: center; gap: 18px; padding: 20px 26px; }
