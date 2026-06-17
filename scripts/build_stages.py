@@ -20,11 +20,13 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT.parent / "360CUX" / "Raw data - 1706" / "UXR AII May 2026"
+# Recommendations come from the [updated] export (adds Associated KPI + P0).
+SRC_RECS = ROOT.parent / "360CUX" / "Raw data - 1706" / "UXR AII May 2026 [updated]"
 OUT = ROOT / "js" / "stages.js"
 
 
-def rows(path):
-    src = (SRC / path).read_text(encoding="utf-8")
+def rows(path, base=SRC):
+    src = (base / path).read_text(encoding="utf-8")
     out = []
     for tr in re.findall(r"<tr[^>]*>(.*?)</tr>", src, re.S):
         cells = [re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", " ", td))).strip()
@@ -114,7 +116,7 @@ def parse_candidate(filename):
 
 def parse_recommendation_tables():
     tables, cur, hmap = [], None, None
-    for r in rows("Recommendations.html"):
+    for r in rows("Recommendations.html", SRC_RECS):
         cells_low = [norm(c) for c in r]
         if "#" in cells_low and any("recommendation" in c for c in cells_low) and any("issue area" in c for c in cells_low):
             hmap = {}
@@ -129,6 +131,8 @@ def parse_recommendation_tables():
                     hmap["area"] = i
                 elif "severity" in c:
                     hmap["severity"] = i
+                elif "kpi" in c:
+                    hmap["kpi"] = i
                 elif "issue area" in c:
                     hmap["issueArea"] = i
                 elif "pain point" in c:
@@ -149,8 +153,8 @@ def parse_recommendation_tables():
         if not (issue_area or rec):
             continue
         cur.append({"num": g("num"), "summary": g("summary"), "recommendation": rec,
-                    "area": g("area"), "severity": g("severity"), "issueArea": issue_area,
-                    "pain": g("pain"), "evidence": g("evidence")})
+                    "area": g("area"), "severity": g("severity"), "kpi": g("kpi"),
+                    "issueArea": issue_area, "pain": g("pain"), "evidence": g("evidence")})
     return tables
 
 

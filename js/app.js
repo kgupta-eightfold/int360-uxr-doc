@@ -708,14 +708,18 @@ const REC_STAGES = [
   { key: 'scheduling', label: 'Scheduling', images: ['Guide selection', 'Customise & schedule'] },
   { key: 'feedback', label: 'Feedback', images: ['Feedback / output page', 'Flagged activities'] },
 ];
-const SEV_RANK = { P1: 0, P2: 1, P3: 2, P4: 3 };
-const isP12 = x => x.severity === 'P1' || x.severity === 'P2';
+const SEV_RANK = { P0: 0, P1: 1, P2: 2, P3: 3, P4: 4 };
+const isUpfront = x => x.severity === 'P0' || x.severity === 'P1' || x.severity === 'P2';
 const bySeverity = arr => [...arr].sort((a, b) => (SEV_RANK[a.severity] ?? 9) - (SEV_RANK[b.severity] ?? 9));
 const sevPill = sev => (sev ? h('span', { class: `tag sev-${sev.toLowerCase()}` }, sev) : null);
 const metaText = parts => {
   const t = parts.filter(Boolean).join('  ·  ');
   return t ? h('span', { class: 'ev-metatext' }, t) : null;
 };
+/* card foot: Source · Participants (left) + KPI (bottom-right, blank if none) */
+const evFoot = (parts, kpi) => h('div', { class: 'ev-foot' },
+  h('span', { class: 'ev-foot-l' }, metaText(parts)),
+  kpi ? h('span', { class: 'ev-kpi' }, kpi) : null);
 
 function evModal(kicker, it) {
   openModal(kicker, it.heading || it.summary || 'Detail',
@@ -735,20 +739,20 @@ function evFindingCard(it, kicker) {
   return h('button', { class: 'glass ev-card', type: 'button', onclick: () => evModal(kicker, it) },
     h('div', { class: 'ev-meta' }, sevPill(it.severity), metaText([it.owner, it.known])),
     h('h4', { class: 'ev-heading' }, it.heading),
-    h('div', { class: 'ev-foot' }, metaText([it.source, it.participants])));
+    evFoot([it.source, it.participants]));
 }
 function evWorksCard(it) {
   return h('button', { class: 'glass ev-card', type: 'button', onclick: () => evModal('What worked', it) },
     h('div', { class: 'ev-meta' }, metaText([it.owner, it.type])),
     h('h4', { class: 'ev-heading' }, it.heading),
-    h('div', { class: 'ev-foot' }, metaText([it.source, it.participants])));
+    evFoot([it.source, it.participants]));
 }
 function evRecCard(it) {
   return h('button', { class: 'glass ev-card', type: 'button', onclick: () => evModal('Recommendation', it) },
     h('div', { class: 'ev-meta' }, sevPill(it.severity), metaText([it.area, it.issueArea])),
     h('h4', { class: 'ev-heading' }, it.summary || it.recommendation),
     (it.summary && it.recommendation) ? h('p', { class: 'ev-rec' }, it.recommendation) : null,
-    h('div', { class: 'ev-foot' }, metaText([it.pain])));
+    evFoot([it.pain], it.kpi));
 }
 
 function stageFindings(dataByStage, stageDefs) {
@@ -789,7 +793,7 @@ function stageFindings(dataByStage, stageDefs) {
     if (def.key === 'works') {
       cards = stage.works.map(evWorksCard);
     } else if (def.key === 'feedback') {
-      cards = bySeverity(stage.issues.filter(isP12)).map(it => evFindingCard(it, 'Feedback'));
+      cards = bySeverity(stage.issues.filter(isUpfront)).map(it => evFindingCard(it, 'Feedback'));
       if (stage.issues.length) cta = h('button', { class: 'ev-viewall', type: 'button',
         onclick: () => openPanel(`${meta.label} · Feedback`, 'All feedback',
           explorer(stage.issues, {
@@ -797,7 +801,7 @@ function stageFindings(dataByStage, stageDefs) {
             render: v => h('div', { class: 'ev-list' }, v.map(it => evFindingCard(it, 'Feedback'))) })) },
         `View all ${stage.issues.length} →`);
     } else {
-      cards = bySeverity(stage.recs.filter(isP12)).map(evRecCard);
+      cards = bySeverity(stage.recs.filter(isUpfront)).map(evRecCard);
       if (stage.recs.length) cta = h('button', { class: 'ev-viewall', type: 'button',
         onclick: () => openPanel(`${meta.label} · Recommendations`, 'All recommendations',
           explorer(stage.recs, {
@@ -805,9 +809,10 @@ function stageFindings(dataByStage, stageDefs) {
             render: v => h('div', { class: 'ev-list' }, v.map(evRecCard)) })) },
         `View all ${stage.recs.length} →`);
     }
-    stackWrap.replaceChildren(
+    stackWrap.replaceChildren(...[
       h('div', { class: 'ev-list' }, cards.length ? cards : h('p', { class: 'fcol-empty' }, 'Nothing logged for this stage.')),
-      cta);
+      cta,
+    ].filter(Boolean));
   }
 
   function renderTabs(meta) {
