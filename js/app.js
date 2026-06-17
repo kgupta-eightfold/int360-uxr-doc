@@ -704,6 +704,10 @@ const CAND_STAGES = [
   { key: 'during', label: 'During Interview', images: ['Screening', 'Role fit / case', 'Coding', 'Whiteboarding'] },
   { key: 'post', label: 'Post interview', images: ['Results & feedback'] },
 ];
+const REC_STAGES = [
+  { key: 'scheduling', label: 'Scheduling', images: ['Guide selection', 'Customise & schedule'] },
+  { key: 'feedback', label: 'Feedback', images: ['Feedback / output page', 'Flagged activities'] },
+];
 const SEV_RANK = { P1: 0, P2: 1, P3: 2, P4: 3 };
 const isP12 = x => x.severity === 'P1' || x.severity === 'P2';
 const bySeverity = arr => [...arr].sort((a, b) => (SEV_RANK[a.severity] ?? 9) - (SEV_RANK[b.severity] ?? 9));
@@ -747,7 +751,7 @@ function evRecCard(it) {
     h('div', { class: 'ev-foot' }, metaText([it.pain])));
 }
 
-function candidateFindings() {
+function stageFindings(dataByStage, stageDefs) {
   let si = 0, ti = 0;
   const TABS = [{ key: 'works', label: 'What worked' }, { key: 'feedback', label: 'Feedback' }, { key: 'recs', label: 'Recommendation' }];
   const switchWrap = h('div', { class: 'setswitch', role: 'tablist', 'aria-label': 'Journey stage' });
@@ -779,7 +783,7 @@ function candidateFindings() {
   }
 
   function renderStack(meta) {
-    const stage = STAGES[meta.key];
+    const stage = dataByStage[meta.key];
     const def = TABS[ti];
     let cards = [], cta = null;
     if (def.key === 'works') {
@@ -807,7 +811,7 @@ function candidateFindings() {
   }
 
   function renderTabs(meta) {
-    const stage = STAGES[meta.key];
+    const stage = dataByStage[meta.key];
     const counts = { works: stage.works.length, feedback: stage.issues.length, recs: stage.recs.length };
     ti = 0;
     const btns = TABS.map((t, k) => {
@@ -820,21 +824,21 @@ function candidateFindings() {
   }
 
   function renderSwitch() {
-    switchWrap.replaceChildren(...CAND_STAGES.map((s, k) => {
+    switchWrap.replaceChildren(...stageDefs.map((s, k) => {
       const b = h('button', { class: 'setbtn' + (k === si ? ' on' : ''), type: 'button', role: 'tab' }, s.label);
       b.addEventListener('click', () => {
         if (si === k) return;
         si = k; ti = 0;
-        renderSwitch(); renderMedia(CAND_STAGES[si]); renderTabs(CAND_STAGES[si]); renderStack(CAND_STAGES[si]);
+        renderSwitch(); renderMedia(stageDefs[si]); renderTabs(stageDefs[si]); renderStack(stageDefs[si]);
       });
       return b;
     }));
   }
 
   renderSwitch();
-  renderMedia(CAND_STAGES[0]);
-  renderTabs(CAND_STAGES[0]);
-  renderStack(CAND_STAGES[0]);
+  renderMedia(stageDefs[0]);
+  renderTabs(stageDefs[0]);
+  renderStack(stageDefs[0]);
 
   return h('div', { class: 'v3-wrap fdetail-wrap reveal' },
     switchWrap,
@@ -891,7 +895,9 @@ function v3Page() {
         h('h2', { class: 'section-title' }, tk.title),
         h('p', { class: 'section-sub' }, tk.subtext)),
       takeawayCards),
-    v2track === 'candidate' ? candidateFindings() : findingsDetail(buildJourneySets('recruiter')));
+    v2track === 'candidate'
+      ? stageFindings(STAGES.candidate, CAND_STAGES)
+      : stageFindings(STAGES.recruiter, REC_STAGES));
 
   const appendix = v3Sec('v3-appendix', 'Appendix', 'Raw research log',
     `Every logged ${v2track} observation (${rows.length} rows). Search or filter.`,

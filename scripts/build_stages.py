@@ -154,8 +154,8 @@ def parse_recommendation_tables():
     return tables
 
 
-# Issue area -> stage key ("all" means show in every stage)
-def rec_stage(issue_area):
+# Issue area -> stage key ("all" means show in every stage of that track)
+def cand_rec_stage(issue_area):
     a = norm(issue_area)
     if "onboarding" in a:
         return "pre"
@@ -168,34 +168,50 @@ def rec_stage(issue_area):
     return None
 
 
-def main():
-    files = {"pre": "Candidate onboarding.html",
-             "during": "Candidate interview.html",
-             "post": "Candidate post interview.html"}
+def rec_rec_stage(issue_area):
+    a = norm(issue_area)
+    if "scheduling" in a:
+        return "scheduling"
+    if "all flows" in a:
+        return "all"
+    return "feedback"  # Feedback form, Analytics, FAQ/support → output/feedback side
+
+
+def build_track(files, rec_table, rec_stage_fn, all_keys):
     stages = {}
     for key, fn in files.items():
         issues, works = parse_candidate(fn)
         stages[key] = {"issues": issues, "works": works, "recs": []}
+    for rec in rec_table:
+        st = rec_stage_fn(rec["issueArea"])
+        targets = all_keys if st == "all" else ([st] if st in stages else [])
+        for k in targets:
+            stages[k]["recs"].append(rec)
+    return stages
 
+
+def main():
     tables = parse_recommendation_tables()
+    recruiter_recs = tables[0] if len(tables) > 0 else []
     candidate_recs = tables[1] if len(tables) > 1 else []
-    for rec in candidate_recs:
-        st = rec_stage(rec["issueArea"])
-        if st == "all":
-            for k in ("pre", "during", "post"):
-                stages[k]["recs"].append(rec)
-        elif st in stages:
-            stages[st]["recs"].append(rec)
 
+    candidate = build_track(
+        {"pre": "Candidate onboarding.html", "during": "Candidate interview.html", "post": "Candidate post interview.html"},
+        candidate_recs, cand_rec_stage, ("pre", "during", "post"))
+    recruiter = build_track(
+        {"scheduling": "Scheduling.html", "feedback": "Feedback form.html"},
+        recruiter_recs, rec_rec_stage, ("scheduling", "feedback"))
+
+    stages = {"candidate": candidate, "recruiter": recruiter}
     js = ("// GENERATED — do not edit by hand. Built by scripts/build_stages.py\n"
-          "// Candidate journey-stage findings, verbatim from the raw research tables.\n"
+          "// Journey-stage findings (candidate + recruiter), verbatim from the raw research tables.\n"
           "export const STAGES = " + json.dumps(stages, ensure_ascii=False, indent=2) + ";\n")
     OUT.write_text(js, encoding="utf-8")
 
     print(f"Wrote {OUT}")
-    for k in ("pre", "during", "post"):
-        s = stages[k]
-        print(f"  {k}: {len(s['issues'])} issues, {len(s['works'])} works, {len(s['recs'])} recs")
+    for track, data in stages.items():
+        for k, s in data.items():
+            print(f"  {track}/{k}: {len(s['issues'])} issues, {len(s['works'])} works, {len(s['recs'])} recs")
 
 
 if __name__ == "__main__":
