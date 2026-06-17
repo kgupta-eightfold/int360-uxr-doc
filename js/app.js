@@ -711,9 +711,15 @@ function findingsDetail(sets) {
 /* images: {label, src?} — src renders the real screenshot (fit, no crop);
    without src a labelled placeholder is shown. */
 const CAND_STAGES = [
-  { key: 'pre', label: 'Pre interview', images: [{ label: 'Invite email' }, { label: 'Landing page' }] },
-  { key: 'during', label: 'During Interview', images: [{ label: 'Conversational' }, { label: 'Whiteboarding' }] },
-  { key: 'post', label: 'Post interview', images: [{ label: 'Post interview' }] },
+  { key: 'pre', label: 'Pre interview', images: [
+    { label: 'Invite email', src: 'img/pre-email.png' },
+    { label: 'Landing page', src: 'img/pre-landing.png' }] },
+  { key: 'during', label: 'During Interview', images: [
+    { label: 'Conversational', src: 'img/during-conversational.png' },
+    { label: 'Whiteboarding', src: 'img/during-whiteboard.png' },
+    { label: 'Coding', src: 'img/during-coding.png' }] },
+  { key: 'post', label: 'Post interview', images: [
+    { label: 'Feedback & next steps', src: 'img/post-feedback.png' }] },
 ];
 const REC_STAGES = [
   { key: 'scheduling', label: 'Scheduling', images: [{ label: 'Guide selection' }, { label: 'Customise & schedule' }] },
