@@ -602,10 +602,19 @@ const TAB_DEFS = [
   { key: 'recs', label: 'Recommendation', render: recItem },
 ];
 
-function mediaButton(label, fullTitle) {
+function mediaButton(img, contextLabel) {
+  const o = typeof img === 'string' ? { label: img } : (img || {});
+  const title = contextLabel ? `${contextLabel} — ${o.label}` : o.label;
+  if (o.src) {
+    return h('button', { class: 'glass fdetail-media fdetail-media--img', type: 'button', 'aria-label': `Expand ${o.label}`,
+      onclick: () => openModal('Evidence', title,
+        h('div', { class: 'modal-media modal-media--img' }, h('img', { src: o.src, alt: o.label }))) },
+      h('img', { class: 'fdetail-img', src: o.src, alt: o.label, loading: 'lazy' }),
+      h('span', { class: 'fdetail-media-hint' }, '⤢ Click to expand'));
+  }
   return h('button', { class: 'glass fdetail-media', type: 'button', 'aria-label': 'Expand image',
-    onclick: () => openModal('Evidence', fullTitle || label, h('div', { class: 'modal-media' }, h('span', {}, label))) },
-    h('span', {}, label),
+    onclick: () => openModal('Evidence', title, h('div', { class: 'modal-media' }, h('span', {}, o.label))) },
+    h('span', {}, o.label),
     h('span', { class: 'fdetail-media-hint' }, '⤢ Click to expand'));
 }
 
@@ -699,14 +708,20 @@ function findingsDetail(sets) {
 /* Data: STAGES (built from the raw candidate tables). Card design per Figma:  */
 /* Severity · Owner · Known  /  Heading  /  [Recommendation]  /  Source · Part */
 /* ========================================================================== */
+/* images: {label, src?} — src renders the real screenshot (fit, no crop);
+   without src a labelled placeholder is shown. */
 const CAND_STAGES = [
-  { key: 'pre', label: 'Pre interview', images: ['Invite email', 'Landing page'] },
-  { key: 'during', label: 'During Interview', images: ['Screening', 'Role fit / case', 'Coding', 'Whiteboarding'] },
-  { key: 'post', label: 'Post interview', images: ['Results & feedback'] },
+  { key: 'pre', label: 'Pre interview', images: [
+    { label: 'Invite email', src: 'img/invite-email.png' },
+    { label: 'Landing page', src: 'img/landing-page.png' }] },
+  { key: 'during', label: 'During Interview', images: [
+    { label: 'Conversational', src: 'img/conversational.png' },
+    { label: 'Whiteboarding' }] },
+  { key: 'post', label: 'Post interview', images: [{ label: 'Post interview' }] },
 ];
 const REC_STAGES = [
-  { key: 'scheduling', label: 'Scheduling', images: ['Guide selection', 'Customise & schedule'] },
-  { key: 'feedback', label: 'Feedback', images: ['Feedback / output page', 'Flagged activities'] },
+  { key: 'scheduling', label: 'Scheduling', images: [{ label: 'Guide selection' }, { label: 'Customise & schedule' }] },
+  { key: 'feedback', label: 'Feedback', images: [{ label: 'Feedback / output page' }, { label: 'Flagged activities' }] },
 ];
 const SEV_RANK = { P0: 0, P1: 1, P2: 2, P3: 3, P4: 4 };
 const isUpfront = x => x.severity === 'P0' || x.severity === 'P1' || x.severity === 'P2';
@@ -765,13 +780,13 @@ function stageFindings(dataByStage, stageDefs) {
 
   function renderMedia(meta) {
     const imgs = meta.images;
-    if (imgs.length <= 1) { mediaWrap.replaceChildren(mediaButton(imgs[0], `${meta.label} — ${imgs[0]}`)); return; }
+    if (imgs.length <= 1) { mediaWrap.replaceChildren(mediaButton(imgs[0], meta.label)); return; }
     let ci = 0;
     const stageEl = h('div', { class: 'imgcar-stage' });
     const cap = h('span', { class: 'imgcar-cap' });
     const dots = h('div', { class: 'imgcar-dots' });
     const draw = () => {
-      stageEl.replaceChildren(mediaButton(imgs[ci], `${meta.label} — ${imgs[ci]}`));
+      stageEl.replaceChildren(mediaButton(imgs[ci], meta.label));
       cap.textContent = `${ci + 1} / ${imgs.length}`;
       [...dots.children].forEach((d, k) => d.classList.toggle('on', k === ci));
     };
