@@ -7,3 +7,4 @@ js/v2content.js
 .DS_Store
 node_modules/
 *.log
+js/stages.js

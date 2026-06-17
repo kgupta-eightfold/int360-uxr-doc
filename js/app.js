@@ -11,7 +11,7 @@ import {
 
 /* Data is provided by the password gate (js/gate.js) after decryption.
    The plaintext data files (data.js / v2content.js) are not shipped to the repo. */
-const { UXR, V2 } = window.__APPDATA__;
+const { UXR, V2, STAGES } = window.__APPDATA__;
 
 const app = document.getElementById('app');
 const subnav = document.getElementById('subnav');
@@ -694,6 +694,153 @@ function findingsDetail(sets) {
     h('div', { class: 'fdetail' }, mediaWrap, h('div', { class: 'fdetail-right' }, tabsWrap, stackWrap)));
 }
 
+/* ========================================================================== */
+/* Candidate findings — journey stages (Pre / During / Post), evidence cards. */
+/* Data: STAGES (built from the raw candidate tables). Card design per Figma:  */
+/* Severity · Owner · Known  /  Heading  /  [Recommendation]  /  Source · Part */
+/* ========================================================================== */
+const CAND_STAGES = [
+  { key: 'pre', label: 'Pre interview', images: ['Invite email', 'Landing page'] },
+  { key: 'during', label: 'During Interview', images: ['Screening', 'Role fit / case', 'Coding', 'Whiteboarding'] },
+  { key: 'post', label: 'Post interview', images: ['Results & feedback'] },
+];
+const SEV_RANK = { P1: 0, P2: 1, P3: 2, P4: 3 };
+const isP12 = x => x.severity === 'P1' || x.severity === 'P2';
+const bySeverity = arr => [...arr].sort((a, b) => (SEV_RANK[a.severity] ?? 9) - (SEV_RANK[b.severity] ?? 9));
+const sevPill = sev => (sev ? h('span', { class: `tag sev-${sev.toLowerCase()}` }, sev) : null);
+const metaText = parts => {
+  const t = parts.filter(Boolean).join('  ·  ');
+  return t ? h('span', { class: 'ev-metatext' }, t) : null;
+};
+
+function evModal(kicker, it) {
+  openModal(kicker, it.heading || it.summary || 'Detail',
+    h('div', { class: 'detail-block' },
+      h('div', { class: 'tagrow', style: 'margin-top:18px' },
+        sevTag(it.severity),
+        (it.owner || it.area) ? ownerTag(it.owner || it.area) : null,
+        it.known ? knownTag(it.known) : null,
+        it.source ? trackTag(it.source) : null,
+        it.issueArea ? trackTag(it.issueArea) : null),
+      it.recommendation ? [h('span', { class: 'flabel' }, 'Recommendation'), h('p', {}, it.recommendation)] : [],
+      it.evidence ? [h('span', { class: 'flabel' }, 'Evidence'), h('p', { class: 'lead' }, it.evidence)] : [],
+      (it.participants || it.pain) ? [h('span', { class: 'flabel' }, it.participants ? 'Participants' : 'Pain point'), h('p', {}, it.participants || it.pain)] : []));
+}
+
+function evFindingCard(it, kicker) {
+  return h('button', { class: 'glass ev-card', type: 'button', onclick: () => evModal(kicker, it) },
+    h('div', { class: 'ev-meta' }, sevPill(it.severity), metaText([it.owner, it.known])),
+    h('h4', { class: 'ev-heading' }, it.heading),
+    h('div', { class: 'ev-foot' }, metaText([it.source, it.participants])));
+}
+function evWorksCard(it) {
+  return h('button', { class: 'glass ev-card', type: 'button', onclick: () => evModal('What worked', it) },
+    h('div', { class: 'ev-meta' }, metaText([it.owner, it.type])),
+    h('h4', { class: 'ev-heading' }, it.heading),
+    h('div', { class: 'ev-foot' }, metaText([it.source, it.participants])));
+}
+function evRecCard(it) {
+  return h('button', { class: 'glass ev-card', type: 'button', onclick: () => evModal('Recommendation', it) },
+    h('div', { class: 'ev-meta' }, sevPill(it.severity), metaText([it.area, it.issueArea])),
+    h('h4', { class: 'ev-heading' }, it.summary || it.recommendation),
+    (it.summary && it.recommendation) ? h('p', { class: 'ev-rec' }, it.recommendation) : null,
+    h('div', { class: 'ev-foot' }, metaText([it.pain])));
+}
+
+function candidateFindings() {
+  let si = 0, ti = 0;
+  const TABS = [{ key: 'works', label: 'What worked' }, { key: 'feedback', label: 'Feedback' }, { key: 'recs', label: 'Recommendation' }];
+  const switchWrap = h('div', { class: 'setswitch', role: 'tablist', 'aria-label': 'Journey stage' });
+  const mediaWrap = h('div', { class: 'fdetail-media-wrap' });
+  const tabsWrap = h('div', { class: 'fdetail-tabs', role: 'tablist', 'aria-label': 'Finding type' });
+  const stackWrap = h('div', { class: 'fdetail-stack' });
+
+  function renderMedia(meta) {
+    const imgs = meta.images;
+    if (imgs.length <= 1) { mediaWrap.replaceChildren(mediaButton(imgs[0], `${meta.label} — ${imgs[0]}`)); return; }
+    let ci = 0;
+    const stageEl = h('div', { class: 'imgcar-stage' });
+    const cap = h('span', { class: 'imgcar-cap' });
+    const dots = h('div', { class: 'imgcar-dots' });
+    const draw = () => {
+      stageEl.replaceChildren(mediaButton(imgs[ci], `${meta.label} — ${imgs[ci]}`));
+      cap.textContent = `${ci + 1} / ${imgs.length}`;
+      [...dots.children].forEach((d, k) => d.classList.toggle('on', k === ci));
+    };
+    imgs.forEach((_, k) => dots.append(h('button', { class: 'imgcar-dot', type: 'button', 'aria-label': `Image ${k + 1}`, onclick: () => { ci = k; draw(); } })));
+    const go = d => { ci = (ci + d + imgs.length) % imgs.length; draw(); };
+    mediaWrap.replaceChildren(h('div', { class: 'imgcar' }, stageEl,
+      h('div', { class: 'imgcar-ctrl' },
+        h('button', { class: 'imgcar-arrow', type: 'button', 'aria-label': 'Previous image', onclick: () => go(-1) }, '‹'),
+        cap,
+        h('button', { class: 'imgcar-arrow', type: 'button', 'aria-label': 'Next image', onclick: () => go(1) }, '›'),
+        dots)));
+    draw();
+  }
+
+  function renderStack(meta) {
+    const stage = STAGES[meta.key];
+    const def = TABS[ti];
+    let cards = [], cta = null;
+    if (def.key === 'works') {
+      cards = stage.works.map(evWorksCard);
+    } else if (def.key === 'feedback') {
+      cards = bySeverity(stage.issues.filter(isP12)).map(it => evFindingCard(it, 'Feedback'));
+      if (stage.issues.length) cta = h('button', { class: 'ev-viewall', type: 'button',
+        onclick: () => openPanel(`${meta.label} · Feedback`, 'All feedback',
+          explorer(stage.issues, {
+            facets: [['Severity', 'severity'], ['Owner', 'owner'], ['Status', 'known'], ['Source', 'source']],
+            render: v => h('div', { class: 'ev-list' }, v.map(it => evFindingCard(it, 'Feedback'))) })) },
+        `View all ${stage.issues.length} →`);
+    } else {
+      cards = bySeverity(stage.recs.filter(isP12)).map(evRecCard);
+      if (stage.recs.length) cta = h('button', { class: 'ev-viewall', type: 'button',
+        onclick: () => openPanel(`${meta.label} · Recommendations`, 'All recommendations',
+          explorer(stage.recs, {
+            facets: [['Severity', 'severity'], ['Product area', 'area'], ['Issue area', 'issueArea']],
+            render: v => h('div', { class: 'ev-list' }, v.map(evRecCard)) })) },
+        `View all ${stage.recs.length} →`);
+    }
+    stackWrap.replaceChildren(
+      h('div', { class: 'ev-list' }, cards.length ? cards : h('p', { class: 'fcol-empty' }, 'Nothing logged for this stage.')),
+      cta);
+  }
+
+  function renderTabs(meta) {
+    const stage = STAGES[meta.key];
+    const counts = { works: stage.works.length, feedback: stage.issues.length, recs: stage.recs.length };
+    ti = 0;
+    const btns = TABS.map((t, k) => {
+      const b = h('button', { class: 'ftab', type: 'button', role: 'tab' }, t.label, h('span', { class: 'ftab-count' }, String(counts[t.key])));
+      b.addEventListener('click', () => { ti = k; btns.forEach((x, j) => x.classList.toggle('on', j === k)); renderStack(meta); });
+      return b;
+    });
+    btns[0].classList.add('on');
+    tabsWrap.replaceChildren(...btns);
+  }
+
+  function renderSwitch() {
+    switchWrap.replaceChildren(...CAND_STAGES.map((s, k) => {
+      const b = h('button', { class: 'setbtn' + (k === si ? ' on' : ''), type: 'button', role: 'tab' }, s.label);
+      b.addEventListener('click', () => {
+        if (si === k) return;
+        si = k; ti = 0;
+        renderSwitch(); renderMedia(CAND_STAGES[si]); renderTabs(CAND_STAGES[si]); renderStack(CAND_STAGES[si]);
+      });
+      return b;
+    }));
+  }
+
+  renderSwitch();
+  renderMedia(CAND_STAGES[0]);
+  renderTabs(CAND_STAGES[0]);
+  renderStack(CAND_STAGES[0]);
+
+  return h('div', { class: 'v3-wrap fdetail-wrap reveal' },
+    switchWrap,
+    h('div', { class: 'fdetail' }, mediaWrap, h('div', { class: 'fdetail-right' }, tabsWrap, stackWrap)));
+}
+
 function v3Page() {
   const c = V2[v2track];
   const rows = RAW_BY_TRACK[v2track];
@@ -744,7 +891,7 @@ function v3Page() {
         h('h2', { class: 'section-title' }, tk.title),
         h('p', { class: 'section-sub' }, tk.subtext)),
       takeawayCards),
-    findingsDetail(buildJourneySets(v2track)));
+    v2track === 'candidate' ? candidateFindings() : findingsDetail(buildJourneySets('recruiter')));
 
   const appendix = v3Sec('v3-appendix', 'Appendix', 'Raw research log',
     `Every logged ${v2track} observation (${rows.length} rows). Search or filter.`,

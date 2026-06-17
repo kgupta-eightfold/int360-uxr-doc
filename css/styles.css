@@ -808,6 +808,22 @@ body.v3 .v3-hero { min-height: 88vh; display: flex; align-items: center; padding
 @keyframes fadeUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
 .hpanel-more { font-size: 13px; color: var(--ink-mute); margin: 14px 0 0; }
 
+/* evidence cards (candidate findings) — Severity·Owner·Known / Heading / Source·Participants */
+.ev-list { display: flex; flex-direction: column; gap: 14px; }
+.ev-card { width: 100%; text-align: left; font-family: var(--sans); cursor: pointer;
+  display: flex; flex-direction: column; gap: 10px; padding: 20px 22px; border: 1px solid var(--line);
+  transition: transform .14s ease, box-shadow .14s ease; }
+.ev-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lift); }
+.ev-meta { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.ev-metatext { font-size: 12.5px; color: var(--ink-mute); font-weight: 600; }
+.ev-heading { font-size: 17px; font-weight: 800; letter-spacing: -.01em; line-height: 1.3; margin: 0; color: var(--ink); }
+.ev-rec { font-size: 14px; line-height: 1.5; margin: 0; color: #2c7a5b; font-weight: 600; }
+.ev-foot { margin-top: 2px; }
+.ev-viewall { align-self: flex-start; margin-top: 6px; background: none; border: none; cursor: pointer;
+  font: 700 13.5px var(--sans); color: var(--accent); padding: 8px 2px; }
+.ev-viewall:hover { text-decoration: underline; }
+.panel-body .ev-list { margin-top: 18px; }
+
 /* image carousel (when a set has multiple images) */
 .imgcar { position: relative; }
 .imgcar-stage { display: block; }

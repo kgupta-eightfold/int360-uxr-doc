@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { UXR } from '../js/data.js';
 import { V2 } from '../js/v2content.js';
+import { STAGES } from '../js/stages.js';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = join(__dirname, '../js/app-data.enc.json');
@@ -30,7 +31,7 @@ const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKD
 const key = await crypto.subtle.deriveKey(
   { name: 'PBKDF2', salt, iterations: ITER, hash: 'SHA-256' },
   baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
-const payload = enc.encode(JSON.stringify({ UXR, V2 }));
+const payload = enc.encode(JSON.stringify({ UXR, V2, STAGES }));
 const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, payload);
 
 const b64 = b => Buffer.from(b).toString('base64');
