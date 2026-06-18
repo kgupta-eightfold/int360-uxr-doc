@@ -18,6 +18,20 @@ const __dirname = dirname(fileURLToPath(import.meta.url));
 const OUT = join(__dirname, '../js/app-data.enc.json');
 const ITER = 210000;
 
+/* Anonymise participant names → first initial across all string values,
+   everywhere in the payload (whole-word, case-sensitive). Re-runs each build. */
+const NAME_MAP = {
+  Padmesh: 'P', Parker: 'P', Shivam: 'S', Terecea: 'T', Mon: 'M', Mandy: 'M',
+  Leah: 'L', Keon: 'K', Jose: 'J', Madhav: 'M', Nicole: 'N', Robin: 'R', Emily: 'E',
+};
+const NAME_RE = new RegExp(
+  '\\b(' + Object.keys(NAME_MAP).sort((a, b) => b.length - a.length).join('|') + ')\\b', 'g');
+const anonymize = v =>
+  typeof v === 'string' ? v.replace(NAME_RE, m => NAME_MAP[m])
+  : Array.isArray(v) ? v.map(anonymize)
+  : (v && typeof v === 'object') ? Object.fromEntries(Object.entries(v).map(([k, val]) => [k, anonymize(val)]))
+  : v;
+
 const password = process.argv[2];
 if (!password) {
   console.error('Usage: node scripts/encrypt.mjs "<password>"');
@@ -31,7 +45,7 @@ const baseKey = await crypto.subtle.importKey('raw', enc.encode(password), 'PBKD
 const key = await crypto.subtle.deriveKey(
   { name: 'PBKDF2', salt, iterations: ITER, hash: 'SHA-256' },
   baseKey, { name: 'AES-GCM', length: 256 }, false, ['encrypt']);
-const payload = enc.encode(JSON.stringify({ UXR, V2, STAGES }));
+const payload = enc.encode(JSON.stringify(anonymize({ UXR, V2, STAGES })));
 const ct = await crypto.subtle.encrypt({ name: 'AES-GCM', iv }, key, payload);
 
 const b64 = b => Buffer.from(b).toString('base64');
