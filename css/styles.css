@@ -750,7 +750,7 @@ body.v3 .v3-hero { min-height: 88vh; display: flex; align-items: center; padding
 .v3-agenda-list li::before { background: transparent; color: var(--accent); border: 1px solid rgba(40, 52, 74, .2); }
 
 /* context card grids */
-.v3-cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.v3-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; }
 .v3-cards--cov { grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); }
 @media (max-width: 880px) { .v3-cards { grid-template-columns: 1fr; } }
 .v3-goal { padding: 26px 28px; display: flex; flex-direction: column; gap: 12px; }
