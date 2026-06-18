@@ -26,9 +26,20 @@ const NAME_MAP = {
 };
 const NAME_RE = new RegExp(
   '\\b(' + Object.keys(NAME_MAP).sort((a, b) => b.length - a.length).join('|') + ')\\b', 'g');
-/* internal reporter attribution → team name */
-const REPORTER_RE = /\bDeepanshu Mishra\b|\bDeepanshu\b/g;
-const scrub = s => s.replace(NAME_RE, m => NAME_MAP[m]).replace(REPORTER_RE, 'Product');
+/* internal reporter attributions → normalised team labels (order matters) */
+const REPORTER_FIXES = [
+  [/Reported by QA Riya Gupta/g, 'Reported by QA'],
+  [/Reported by PM\b/g, 'Reported by Product'],
+  [/\bDeepanshu Mishra\b|\bDeepanshu\b/g, 'Product'],
+  [/\bKadambari Komandur\b|\bKadambari\b/g, 'Product'],
+  [/\bKartikeya Gupta\b|\bKartikeya\b/g, 'Product'],
+  [/\bRiya Gupta\b/g, 'QA'],
+];
+const scrub = s => {
+  s = s.replace(NAME_RE, m => NAME_MAP[m]);
+  for (const [re, rep] of REPORTER_FIXES) s = s.replace(re, rep);
+  return s;
+};
 const anonymize = v =>
   typeof v === 'string' ? scrub(v)
   : Array.isArray(v) ? v.map(anonymize)
