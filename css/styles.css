@@ -611,6 +611,8 @@ body.deck .pslide-watch { color: var(--d-mute); margin-bottom: 18px; }
 .pslide--unmoderated .pslide-viz { background: linear-gradient(120deg, #2563a8, #56b8ff); }
 .pslide--progress .pslide-viz { background: linear-gradient(120deg, #c2701a, #f0a35f); }
 .pslide--progress .pslide-count { background: #fbe7cf; color: #8a4d12; }
+/* in-progress card reads slightly duller than the completed two */
+.v3-persona.pslide--progress { opacity: .78; }
 body.deck .carousel-arrow { background: rgba(255, 255, 255, .07); border-color: var(--d-line); color: var(--d-ink); }
 body.deck .carousel-arrow:hover { background: linear-gradient(120deg, var(--d-accent), var(--d-accent2)); color: #04241a; border-color: transparent; }
 body.deck .carousel-hint { color: var(--d-mute); }
@@ -755,7 +757,10 @@ body.v3 .v3-hero { min-height: 88vh; display: flex; align-items: center; padding
 .v3-goal .goal-num { font-size: 34px; }
 .v3-cov { padding: 24px 26px; display: flex; flex-direction: column; gap: 8px; }
 .v3-persona { padding: 24px 26px 0; display: flex; flex-direction: column; gap: 8px; overflow: hidden; }
-.v3-persona .pslide-viz { margin: 18px -26px 0; height: 5px; }
+.v3-persona .pslide-viz { margin: 22px -26px 0; height: 5px; }
+/* bottom-align the accent stripe regardless of how much text the card has */
+.v3-persona { justify-content: flex-start; }
+.v3-persona .pslide-viz { margin-top: auto; }
 .persona-facts { list-style: none; margin: 8px 0 16px; padding: 0; display: flex; flex-direction: column; gap: 11px; }
 .persona-facts li { position: relative; padding-left: 16px; font-size: 13.5px; line-height: 1.5; color: var(--ink-soft); }
 .persona-facts li::before { content: '•'; position: absolute; left: 2px; color: var(--accent); font-weight: 700; }
