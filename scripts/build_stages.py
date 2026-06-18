@@ -22,6 +22,8 @@ ROOT = Path(__file__).resolve().parent.parent
 SRC = ROOT.parent / "360CUX" / "Raw data - 1706" / "UXR AII May 2026"
 # Recommendations come from the [updated] export (adds Associated KPI + P0).
 SRC_RECS = ROOT.parent / "360CUX" / "Raw data - 1706" / "UXR AII May 2026 [updated]"
+# Recruiter "What Worked Well" comes from the [2] export (richer positives).
+SRC_REC_WORKS = ROOT.parent / "360CUX" / "Raw data - 1706" / "UXR AII May 2026 [2]"
 OUT = ROOT / "js" / "stages.js"
 
 
@@ -47,10 +49,10 @@ def hidden(show):
     return bool(re.search(r"don'?t\s*show|no\s*show", show or "", re.I))
 
 
-def parse_candidate(filename):
+def parse_candidate(filename, base=SRC):
     issues, works = [], []
     section, hmap = None, None
-    for r in rows(filename):
+    for r in rows(filename, base):
         head_txt = norm(first_nonempty(r))
         if head_txt.startswith("issues") and "worked" not in head_txt:
             section, hmap = "issues", None
@@ -181,10 +183,12 @@ def rec_rec_stage(issue_area):
     return "feedback"  # Feedback form, Analytics, FAQ/support → output/feedback side
 
 
-def build_track(files, rec_table, rec_stage_fn, all_keys):
+def build_track(files, rec_table, rec_stage_fn, all_keys, works_base=None):
     stages = {}
     for key, fn in files.items():
         issues, works = parse_candidate(fn)
+        if works_base is not None:  # take only "What worked" from an alternate export
+            _, works = parse_candidate(fn, works_base)
         stages[key] = {"issues": issues, "works": works, "recs": []}
     for rec in rec_table:
         st = rec_stage_fn(rec["issueArea"])
@@ -204,7 +208,7 @@ def main():
         candidate_recs, cand_rec_stage, ("pre", "during", "post"))
     recruiter = build_track(
         {"scheduling": "Scheduling.html", "feedback": "Feedback form.html"},
-        recruiter_recs, rec_rec_stage, ("scheduling", "feedback"))
+        recruiter_recs, rec_rec_stage, ("scheduling", "feedback"), works_base=SRC_REC_WORKS)
 
     stages = {"candidate": candidate, "recruiter": recruiter}
     js = ("// GENERATED — do not edit by hand. Built by scripts/build_stages.py\n"
