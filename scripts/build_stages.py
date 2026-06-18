@@ -107,12 +107,13 @@ def parse_candidate(filename, base=SRC):
                            "owner": g("owner"), "known": g("known"), "source": g("source"),
                            "evidence": g("evidence")})
         else:
-            heading = g("pos") or g("heading")
-            if not heading:
+            short_h, finding = g("heading"), g("pos")
+            if not (short_h or finding):
                 continue
-            works.append({"id": g("id"), "heading": heading, "participants": g("participants"),
-                          "owner": g("owner"), "type": g("type"), "source": g("source"),
-                          "evidence": g("evidence")})
+            # heading = short title on the card; finding = positive finding shown in the modal
+            works.append({"id": g("id"), "heading": short_h or finding, "finding": finding or short_h,
+                          "participants": g("participants"), "owner": g("owner"), "type": g("type"),
+                          "source": g("source"), "evidence": g("evidence")})
     return issues, works
 
 

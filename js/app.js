@@ -747,8 +747,9 @@ function evModal(kicker, it) {
         it.known ? knownTag(it.known) : null,
         it.source ? trackTag(it.source) : null,
         it.issueArea ? trackTag(it.issueArea) : null),
+      (it.finding && it.finding !== it.heading) ? [h('span', { class: 'flabel' }, 'Positive finding'), h('p', { class: 'lead' }, it.finding)] : [],
       it.recommendation ? [h('span', { class: 'flabel' }, 'Recommendation'), h('p', {}, it.recommendation)] : [],
-      it.evidence ? [h('span', { class: 'flabel' }, 'Evidence'), h('p', { class: 'lead' }, it.evidence)] : [],
+      it.evidence ? [h('span', { class: 'flabel' }, 'Evidence'), h('p', { class: it.finding ? '' : 'lead' }, it.evidence)] : [],
       (it.participants || it.pain) ? [h('span', { class: 'flabel' }, it.participants ? 'Participants' : 'Pain point'), h('p', {}, it.participants || it.pain)] : []));
 }
 
