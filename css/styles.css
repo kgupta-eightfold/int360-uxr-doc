@@ -609,6 +609,8 @@ body.deck .pslide-watch { color: var(--d-mute); margin-bottom: 18px; }
 .pslide--hvh .pslide-viz { background: linear-gradient(120deg, #c0563a, #f0a35f); }
 .pslide--moderated .pslide-viz { background: linear-gradient(120deg, #0e8a6e, #5fe3b3); }
 .pslide--unmoderated .pslide-viz { background: linear-gradient(120deg, #2563a8, #56b8ff); }
+.pslide--progress .pslide-viz { background: linear-gradient(120deg, #c2701a, #f0a35f); }
+.pslide--progress .pslide-count { background: #fbe7cf; color: #8a4d12; }
 body.deck .carousel-arrow { background: rgba(255, 255, 255, .07); border-color: var(--d-line); color: var(--d-ink); }
 body.deck .carousel-arrow:hover { background: linear-gradient(120deg, var(--d-accent), var(--d-accent2)); color: #04241a; border-color: transparent; }
 body.deck .carousel-hint { color: var(--d-mute); }
