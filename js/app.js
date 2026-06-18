@@ -722,8 +722,8 @@ const CAND_STAGES = [
     { label: 'Feedback & next steps', src: 'img/post-feedback.png' }] },
 ];
 const REC_STAGES = [
-  { key: 'scheduling', label: 'Scheduling', images: [{ label: 'Guide selection' }, { label: 'Customise & schedule' }] },
-  { key: 'feedback', label: 'Feedback', images: [{ label: 'Feedback / output page' }, { label: 'Flagged activities' }] },
+  { key: 'scheduling', label: 'Scheduling', images: [{ label: 'Interview builder', src: 'img/rux-scheduling.png' }] },
+  { key: 'feedback', label: 'Feedback', images: [{ label: 'Review AI feedback', src: 'img/rux-feedback.png' }] },
 ];
 const SEV_RANK = { P0: 0, P1: 1, P2: 2, P3: 3, P4: 4 };
 const isUpfront = x => x.severity === 'P0' || x.severity === 'P1' || x.severity === 'P2';
